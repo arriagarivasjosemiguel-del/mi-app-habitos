@@ -12,7 +12,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Ocultar scrollbar para que se vea como app móvil */
 ::-webkit-scrollbar {
   display: none;
 }
