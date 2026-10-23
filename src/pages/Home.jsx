@@ -3,19 +3,21 @@ import { Bell, CheckCircle2, Circle, MoreVertical, Trash2, LogIn } from 'lucide-
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HabitForm } from '../components/HabitForm';
+import { useNavigate } from 'react-router-dom'; // IMPORTANTE para la navegación
 
 export const Home = () => {
   const { user, habits, toggleHabit, deleteHabit, loginWithGoogle } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const navigate = useNavigate(); // Hook para navegar
 
   const sortedHabits = [...habits].sort((a, b) => Number(a.completed) - Number(b.completed));
   const completedCount = habits.filter(h => h.completed).length;
   const progress = habits.length === 0 ? 0 : (completedCount / habits.length) * 100;
 
   return (
-    <div className="relative min-h-full animate-slide-up pb-24"> {/* Padding inferior para el botón */}
+    <div className="relative min-h-full animate-slide-up pb-24">
       <header className="sticky top-0 z-40 bg-bgDark/90 backdrop-blur-md px-6 py-4 border-b border-gray-800 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Hoy</h1>
@@ -48,7 +50,8 @@ export const Home = () => {
           <div className="relative z-10">
             <span className="bg-accent text-white text-[10px] font-bold px-2 py-1 rounded-md mb-2 inline-block uppercase tracking-wider">Recomendado</span>
             <h2 className="text-xl font-bold leading-tight mb-2 text-white">Construye la mejor<br/>versión de ti</h2>
-            <button className="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-white/30 transition">Ver viajes →</button>
+            {/* BOTÓN CORREGIDO PARA NAVEGAR A VIAJES */}
+            <button onClick={() => navigate('/viajes')} className="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-white/30 transition">Ver viajes →</button>
           </div>
         </div>
 
@@ -108,7 +111,6 @@ export const Home = () => {
         </div>
       </div>
 
-      {/* Botón fijo corregido */}
       <div className="fixed bottom-20 left-0 w-full flex justify-center z-40 pointer-events-none px-6">
         <button onClick={() => setShowForm(true)} className="w-full max-w-sm py-3 bg-accent text-white rounded-xl font-bold shadow-lg shadow-accent/30 pointer-events-auto hover:bg-accentHover transition-colors">
           + Agregar Hábito

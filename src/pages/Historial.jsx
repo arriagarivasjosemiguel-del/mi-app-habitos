@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Flame, CheckCircle, Target, TrendingUp, Calendar as CalendarIcon, BarChart2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const Historial = () => {
   const { habits } = useApp();
-  const [chartMode, setChartMode] = useState('Semanal'); // Diario, Semanal, Mensual
+  
+  // Guardar preferencia del gráfico en localStorage
+  const [chartMode, setChartMode] = useState(() => {
+    return localStorage.getItem('chartMode') || 'Semanal';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('chartMode', chartMode);
+  }, [chartMode]);
   
   const total = habits.length;
   const completed = habits.filter(h => h.completed).length;
@@ -18,9 +26,22 @@ export const Historial = () => {
   const today = new Date().getDate();
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+  // Lógica de gráficos simulados
+  const generateChartData = () => {
+    if (chartMode === 'Semanal') {
+      return { labels: ['L', 'M', 'M', 'J', 'V', 'S', 'D'], data: [40, 70, 45, 90, 100, 30, 80] };
+    } else if (chartMode === 'Mensual') {
+      return { labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'], data: [65, 80, 55, 90] };
+    } else {
+      // Diario: mostramos los últimos 7 días como simulación
+      return { labels: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'], data: [50, 60, 70, 80, 90, 100, 85] };
+    }
+  };
+
+  const chartInfo = generateChartData();
+
   return (
     <div className="min-h-full animate-slide-up pb-24">
-      {/* HEADER REDISEÑADO (Más pequeño) */}
       <header className="sticky top-0 z-40 bg-gradient-to-br from-indigo-900 to-bgDark px-6 py-6 rounded-b-3xl shadow-lg mb-6">
         <div className="flex items-center gap-3 mb-1">
           <TrendingUp size={24} className="text-accent" />
@@ -30,7 +51,6 @@ export const Historial = () => {
       </header>
 
       <div className="px-6">
-        {/* TARJETAS DE ESTADÍSTICAS */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-accent p-3 rounded-2xl flex flex-col items-start justify-between h-24 shadow-lg shadow-accent/20">
             <Flame size={18} className="text-white/80" />
@@ -55,7 +75,6 @@ export const Historial = () => {
           </div>
         </div>
 
-        {/* CALENDARIO (Restaurado) */}
         <div className="bg-cardDark p-5 rounded-2xl border border-gray-800 mb-6 shadow-sm">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
@@ -64,6 +83,7 @@ export const Historial = () => {
             </div>
           </div>
           <div className="grid grid-cols-7 gap-1 text-center text-[10px] text-textMuted mb-2 font-bold">
+            {/* BUG CORREGIDO: Letras correctas en vez de "Metro" */}
             <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
           </div>
           <div className="grid grid-cols-7 gap-1 text-center text-sm">
@@ -82,14 +102,12 @@ export const Historial = () => {
           </div>
         </div>
 
-        {/* GRÁFICO DE BARRAS INTERACTIVO */}
         <div className="bg-cardDark p-5 rounded-2xl border border-gray-800 mb-6 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
               <BarChart2 size={18} className="text-accent" />
               <h3 className="font-bold text-white">Progreso</h3>
             </div>
-            {/* Selector de modo */}
             <div className="flex bg-bgDark rounded-lg p-1 border border-gray-800">
               {['Diario', 'Semanal', 'Mensual'].map((mode) => (
                 <button
@@ -104,18 +122,17 @@ export const Historial = () => {
           </div>
 
           <div className="flex items-end justify-between h-32 gap-2">
-            {[40, 70, 45, 90, 100, 30, 80].map((val, i) => (
+            {chartInfo.data.map((val, i) => (
               <div key={i} className="flex flex-col items-center gap-2 flex-1 h-full justify-end group">
                 <div className="w-full bg-accent/10 rounded-t-md relative h-full flex items-end">
                    <div className="w-full bg-accent rounded-t-md transition-all duration-1000 group-hover:bg-accentHover" style={{ height: `${val}%` }}></div>
                 </div>
-                <span className="text-[10px] text-textMuted font-medium">{['L', 'M', 'M', 'J', 'V', 'S', 'D'][i]}</span>
+                <span className="text-[10px] text-textMuted font-medium">{chartInfo.labels[i]}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* RESUMEN DE HOY */}
         <div className="bg-cardDark p-5 rounded-2xl border border-gray-800 shadow-sm mb-6">
           <h3 className="font-bold mb-4 text-white">Resumen de Hoy</h3>
           

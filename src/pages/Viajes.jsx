@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Play, X, Clock, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -27,17 +27,25 @@ const JOURNEYS = [
 ];
 
 export const Viajes = () => {
-  const [myJourneys, setMyJourneys] = useState([]);
-  const [selectedJourney, setSelectedJourney] = useState(null);
+  // Guardar en localStorage para que no se borren al recargar
+  const [myJourneys, setMyJourneys] = useState(() => {
+    const saved = localStorage.getItem('myJourneys');
+    return saved ? JSON.parse(saved) : [];
+  });
   
-  // Estados para el formulario del modal
+  const [selectedJourney, setSelectedJourney] = useState(null);
   const [selectedLevel, setSelectedLevel] = useState('Principiante');
   const [selectedFreq, setSelectedFreq] = useState('Lunes a Lunes (Todos los días)');
+
+  // Efecto para guardar en localStorage cuando cambie
+  useEffect(() => {
+    localStorage.setItem('myJourneys', JSON.stringify(myJourneys));
+  }, [myJourneys]);
 
   const handleJoin = () => {
     setMyJourneys([...myJourneys, selectedJourney.id]);
     setSelectedJourney(null);
-    alert(`¡Te has unido a "${selectedJourney.title}"! Revisa la pestaña "Mis Viajes".`);
+    alert(`¡Te has unido a "${selectedJourney.title}"!`);
   };
 
   return (
@@ -85,42 +93,33 @@ export const Viajes = () => {
 
       <AnimatePresence>
         {selectedJourney && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 z-50 flex items-end justify-center backdrop-blur-sm">
-            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25 }} className="bg-cardDark w-full max-w-md rounded-t-3xl p-6 border-t border-gray-700 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Configurar Viaje</h2>
-                <button onClick={() => setSelectedJourney(null)} className="p-2 bg-gray-800 rounded-full text-gray-400 hover:text-white">
-                  <X size={20} />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+            {/* MODAL CENTRADO Y COMPACTO */}
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-cardDark w-full max-w-sm rounded-3xl p-6 border border-gray-700 max-h-[85vh] overflow-y-auto shadow-2xl">
+              <div className="flex justify-between items-center mb-5">
+                <h2 className="text-xl font-bold text-white">Configurar Viaje</h2>
+                <button onClick={() => setSelectedJourney(null)} className="p-1.5 bg-gray-800 rounded-full text-gray-400 hover:text-white">
+                  <X size={18} />
                 </button>
               </div>
 
-              <div className="space-y-6">
-                {/* Nivel de dificultad */}
+              <div className="space-y-5">
                 <div>
-                  <label className="text-sm font-semibold text-textMuted mb-2 block">Nivel de dificultad</label>
+                  <label className="text-xs font-semibold text-textMuted mb-2 block uppercase tracking-wider">Nivel de dificultad</label>
                   <div className="flex gap-2">
                     {['Principiante', 'Intermedio', 'Maestro'].map(lvl => (
-                      <button 
-                        key={lvl} 
-                        onClick={() => setSelectedLevel(lvl)}
-                        className={`flex-1 py-2 border rounded-xl text-xs transition ${selectedLevel === lvl ? 'bg-accent/20 border-accent text-accent font-bold' : 'bg-bgDark border-gray-800 text-white hover:border-gray-600'}`}
-                      >
+                      <button key={lvl} onClick={() => setSelectedLevel(lvl)} className={`flex-1 py-2 border rounded-lg text-[11px] transition ${selectedLevel === lvl ? 'bg-accent/20 border-accent text-accent font-bold' : 'bg-bgDark border-gray-800 text-white hover:border-gray-600'}`}>
                         {lvl}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Frecuencia */}
                 <div>
-                  <label className="text-sm font-semibold text-textMuted mb-2 block">Frecuencia</label>
+                  <label className="text-xs font-semibold text-textMuted mb-2 block uppercase tracking-wider">Frecuencia</label>
                   <div className="flex flex-col gap-2">
                     {['Lunes a Lunes (Todos los días)', 'Lunes a Viernes (Días laborales)', 'Personalizado'].map(freq => (
-                      <button 
-                        key={freq} 
-                        onClick={() => setSelectedFreq(freq)}
-                        className={`w-full py-3 border rounded-xl text-sm text-left px-4 transition ${selectedFreq === freq ? 'bg-accent/10 border-accent text-accent font-semibold' : 'bg-bgDark border-gray-800 text-white hover:border-gray-600'}`}
-                      >
+                      <button key={freq} onClick={() => setSelectedFreq(freq)} className={`w-full py-2.5 border rounded-lg text-xs text-left px-3 transition ${selectedFreq === freq ? 'bg-accent/10 border-accent text-accent font-semibold' : 'bg-bgDark border-gray-800 text-white hover:border-gray-600'}`}>
                         {freq}
                       </button>
                     ))}
@@ -128,17 +127,16 @@ export const Viajes = () => {
                   </div>
                 </div>
 
-                {/* Hora y duración */}
                 <div>
-                  <label className="text-sm font-semibold text-textMuted mb-2 block">Hora y duración</label>
-                  <div className="flex gap-3">
-                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-xl p-3 flex items-center gap-2">
-                      <Clock size={16} className="text-accent" />
-                      <input type="time" className="bg-transparent text-white outline-none w-full text-sm" defaultValue="08:00" />
+                  <label className="text-xs font-semibold text-textMuted mb-2 block uppercase tracking-wider">Hora y duración</label>
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
+                      <Clock size={14} className="text-accent" />
+                      <input type="time" className="bg-transparent text-white outline-none w-full text-xs" defaultValue="08:00" />
                     </div>
-                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-xl p-3 flex items-center gap-2">
-                      <Calendar size={16} className="text-accent" />
-                      <select className="bg-transparent text-white outline-none w-full text-sm appearance-none">
+                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
+                      <Calendar size={14} className="text-accent" />
+                      <select className="bg-transparent text-white outline-none w-full text-xs appearance-none">
                         <option>10 min</option>
                         <option>15 min</option>
                         <option>20 min</option>
@@ -148,7 +146,7 @@ export const Viajes = () => {
                   </div>
                 </div>
 
-                <button onClick={handleJoin} className="w-full py-4 bg-accent text-white font-bold rounded-xl text-lg shadow-lg shadow-accent/30 hover:bg-accentHover transition mt-4">
+                <button onClick={handleJoin} className="w-full py-3.5 bg-accent text-white font-bold rounded-xl text-sm shadow-lg shadow-accent/30 hover:bg-accentHover transition mt-2">
                   Comenzar Viaje
                 </button>
               </div>
