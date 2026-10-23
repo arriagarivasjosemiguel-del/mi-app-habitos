@@ -10,14 +10,12 @@ export const Home = () => {
   const [menuOpen, setMenuOpen] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Ordenar: Pendientes primero, completados al final
   const sortedHabits = [...habits].sort((a, b) => Number(a.completed) - Number(b.completed));
   const completedCount = habits.filter(h => h.completed).length;
   const progress = habits.length === 0 ? 0 : (completedCount / habits.length) * 100;
 
   return (
-    <div className="relative min-h-full animate-slide-up">
-      {/* HEADER PROFESIONAL */}
+    <div className="relative min-h-full animate-slide-up pb-24"> {/* Padding inferior para el botón */}
       <header className="sticky top-0 z-40 bg-bgDark/90 backdrop-blur-md px-6 py-4 border-b border-gray-800 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Hoy</h1>
@@ -32,7 +30,6 @@ export const Home = () => {
       </header>
 
       <div className="p-6">
-        {/* BANNER DE LOGIN SI NO ESTÁ LOGUEADO */}
         {!user && (
           <div className="bg-accent/10 border border-accent/30 rounded-2xl p-4 mb-6 flex items-center justify-between">
             <div>
@@ -45,7 +42,6 @@ export const Home = () => {
           </div>
         )}
 
-        {/* BANNER VIAJES */}
         <div className="relative rounded-2xl overflow-hidden mb-6 h-40 flex flex-col justify-end p-5 border border-gray-800 shadow-lg">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&q=80&w=600')] bg-cover bg-center"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
@@ -56,7 +52,6 @@ export const Home = () => {
           </div>
         </div>
 
-        {/* PROGRESO */}
         <div className="mb-4">
           <div className="flex justify-between items-end mb-2">
             <h3 className="font-bold text-lg text-white">Hábitos de Hoy</h3>
@@ -67,7 +62,6 @@ export const Home = () => {
           </div>
         </div>
 
-        {/* LISTA DE HÁBITOS */}
         <div className="space-y-3">
           <AnimatePresence>
             {sortedHabits.map((habit) => (
@@ -112,15 +106,17 @@ export const Home = () => {
             ))}
           </AnimatePresence>
         </div>
+      </div>
 
-        <button onClick={() => setShowForm(true)} className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-sm py-3 bg-accent text-white rounded-xl font-bold shadow-lg shadow-accent/30 z-40 hover:bg-accentHover transition-colors">
+      {/* Botón fijo corregido */}
+      <div className="fixed bottom-20 left-0 w-full flex justify-center z-40 pointer-events-none px-6">
+        <button onClick={() => setShowForm(true)} className="w-full max-w-sm py-3 bg-accent text-white rounded-xl font-bold shadow-lg shadow-accent/30 pointer-events-auto hover:bg-accentHover transition-colors">
           + Agregar Hábito
         </button>
       </div>
 
       {showForm && <HabitForm onClose={() => setShowForm(false)} />}
 
-      {/* MODAL DE NOTIFICACIONES */}
       <AnimatePresence>
         {showNotifications && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center pt-20 px-4 backdrop-blur-sm">

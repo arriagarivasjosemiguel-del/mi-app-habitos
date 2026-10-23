@@ -2,22 +2,42 @@ import { useState } from 'react';
 import { Play, X, Clock, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Base de datos de viajes (agregué unos cuantos como ejemplo)
 const JOURNEYS = [
-  { id: 'j1', title: 'Rutina de mañana', desc: 'Empieza el día con energía y enfoque.', days: '7 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&q=80&w=600', habits: ['Beber agua', 'Estiramiento 5 min', 'Meditar'] },
-  { id: 'j2', title: 'Meditación para tranquilidad', desc: 'Calma tu mente, mejora tu enfoque.', days: '7 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600', habits: ['Meditar 10 min', 'Respirar profundo', 'Yoga suave'] },
-  { id: 'j3', title: 'Despídete del azúcar', desc: 'Más energía, mejor salud.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1622484212850-eb596d769edc?auto=format&fit=crop&q=80&w=600', habits: ['No azúcar', 'Comer fruta', 'Tomar agua'] },
-  { id: 'j4', title: 'Ejercicio en casa', desc: 'Mantente en forma sin ir al gimnasio.', days: '30 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=600', habits: ['Flexiones', 'Sentadillas', 'Plancha'] },
+  { id: 'j1', title: 'Rutina de mañana', desc: 'Empieza el día con energía y enfoque.', days: '7 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j2', title: 'Meditación para tranquilidad', desc: 'Calma tu mente, mejora tu enfoque.', days: '7 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j3', title: 'Despídete del azúcar', desc: 'Más energía, mejor salud.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1622484212850-eb596d769edc?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j4', title: 'Lectura diaria', desc: 'Alimenta tu mente con buenos libros.', days: '21 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j5', title: 'Ejercicio en casa', desc: 'Mantente en forma sin ir al gimnasio.', days: '30 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j6', title: 'Hidratación extrema', desc: 'Toma más agua durante el día.', days: '7 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j7', title: 'Dormir mejor', desc: 'Mejora la calidad de tu sueño.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j8', title: 'Aprender un idioma', desc: 'Practica un nuevo idioma cada día.', days: '30 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j9', title: 'Productividad', desc: 'Optimiza tu tiempo y enfócate.', days: '14 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j10', title: 'Alimentación sana', desc: 'Come mejor para sentirte mejor.', days: '21 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j11', title: 'Yoga para principiantes', desc: 'Flexibilidad y relajación.', days: '7 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j12', title: 'Caminar diario', desc: 'Da 10,000 pasos al día.', days: '30 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j13', title: 'Diario de gratitud', desc: 'Escribe 3 cosas buenas al día.', days: '21 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j14', title: 'Cuidado de la piel', desc: 'Rutina básica de skincare.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j15', title: 'Sin redes sociales', desc: 'Desconéctate del mundo digital.', days: '7 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j16', title: 'Orden en casa', desc: 'Mantén tu espacio limpio.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j17', title: 'Finanzas personales', desc: 'Ahorra y controla tus gastos.', days: '30 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j18', title: 'Creatividad', desc: 'Dibuja o escribe algo nuevo.', days: '21 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j19', title: 'Cocina saludable', desc: 'Prepara tus propias comidas.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j20', title: 'Conexión social', desc: 'Habla con alguien que quieras.', days: '7 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j21', title: 'Respiración consciente', desc: 'Reduce el estrés con respiración.', days: '7 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&q=80&w=600' },
 ];
 
 export const Viajes = () => {
   const [myJourneys, setMyJourneys] = useState([]);
   const [selectedJourney, setSelectedJourney] = useState(null);
+  
+  // Estados para el formulario del modal
+  const [selectedLevel, setSelectedLevel] = useState('Principiante');
+  const [selectedFreq, setSelectedFreq] = useState('Lunes a Lunes (Todos los días)');
 
-  const handleJoin = (journey) => {
-    setMyJourneys([...myJourneys, journey.id]);
+  const handleJoin = () => {
+    setMyJourneys([...myJourneys, selectedJourney.id]);
     setSelectedJourney(null);
-    alert(`¡Te has unido a "${journey.title}"! Revisa la pestaña "Mis Viajes".`);
+    alert(`¡Te has unido a "${selectedJourney.title}"! Revisa la pestaña "Mis Viajes".`);
   };
 
   return (
@@ -27,7 +47,6 @@ export const Viajes = () => {
         <p className="text-textMuted text-sm mt-1">Desafíos que te llevan más lejos.</p>
       </header>
 
-      {/* MIS VIAJES */}
       {myJourneys.length > 0 && (
         <div className="mb-8">
           <h2 className="font-bold text-xl text-white mb-4">Mis Viajes Activos</h2>
@@ -47,7 +66,6 @@ export const Viajes = () => {
         </div>
       )}
 
-      {/* TODOS LOS VIAJES */}
       <h2 className="font-bold text-xl text-white mb-4">Viajes Disponibles</h2>
       <div className="space-y-4">
         {JOURNEYS.filter(j => !myJourneys.includes(j.id)).map((c) => (
@@ -65,7 +83,6 @@ export const Viajes = () => {
         ))}
       </div>
 
-      {/* MODAL DE CONFIGURACIÓN DE VIAJE */}
       <AnimatePresence>
         {selectedJourney && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 z-50 flex items-end justify-center backdrop-blur-sm">
@@ -78,28 +95,40 @@ export const Viajes = () => {
               </div>
 
               <div className="space-y-6">
-                {/* NIVEL */}
+                {/* Nivel de dificultad */}
                 <div>
                   <label className="text-sm font-semibold text-textMuted mb-2 block">Nivel de dificultad</label>
                   <div className="flex gap-2">
                     {['Principiante', 'Intermedio', 'Maestro'].map(lvl => (
-                      <button key={lvl} className="flex-1 py-2 bg-bgDark border border-gray-800 rounded-xl text-xs text-white hover:border-accent focus:border-accent focus:bg-accent/10 transition">{lvl}</button>
+                      <button 
+                        key={lvl} 
+                        onClick={() => setSelectedLevel(lvl)}
+                        className={`flex-1 py-2 border rounded-xl text-xs transition ${selectedLevel === lvl ? 'bg-accent/20 border-accent text-accent font-bold' : 'bg-bgDark border-gray-800 text-white hover:border-gray-600'}`}
+                      >
+                        {lvl}
+                      </button>
                     ))}
                   </div>
                 </div>
 
-                {/* DÍAS */}
+                {/* Frecuencia */}
                 <div>
                   <label className="text-sm font-semibold text-textMuted mb-2 block">Frecuencia</label>
                   <div className="flex flex-col gap-2">
-                    <button className="w-full py-3 bg-bgDark border border-gray-800 rounded-xl text-sm text-white text-left px-4 hover:border-accent transition">Lunes a Lunes (Todos los días)</button>
-                    <button className="w-full py-3 bg-bgDark border border-gray-800 rounded-xl text-sm text-white text-left px-4 hover:border-accent transition">Lunes a Viernes (Días laborales)</button>
-                    <button className="w-full py-3 bg-bgDark border border-gray-800 rounded-xl text-sm text-accent font-semibold text-left px-4 border-accent bg-accent/10">Personalizado</button>
+                    {['Lunes a Lunes (Todos los días)', 'Lunes a Viernes (Días laborales)', 'Personalizado'].map(freq => (
+                      <button 
+                        key={freq} 
+                        onClick={() => setSelectedFreq(freq)}
+                        className={`w-full py-3 border rounded-xl text-sm text-left px-4 transition ${selectedFreq === freq ? 'bg-accent/10 border-accent text-accent font-semibold' : 'bg-bgDark border-gray-800 text-white hover:border-gray-600'}`}
+                      >
+                        {freq}
+                      </button>
+                    ))}
                     <p className="text-[10px] text-yellow-500 mt-1">💡 Recomendado: al menos 5 días a la semana.</p>
                   </div>
                 </div>
 
-                {/* TIEMPO */}
+                {/* Hora y duración */}
                 <div>
                   <label className="text-sm font-semibold text-textMuted mb-2 block">Hora y duración</label>
                   <div className="flex gap-3">
@@ -119,7 +148,7 @@ export const Viajes = () => {
                   </div>
                 </div>
 
-                <button onClick={() => handleJoin(selectedJourney)} className="w-full py-4 bg-accent text-white font-bold rounded-xl text-lg shadow-lg shadow-accent/30 hover:bg-accentHover transition mt-4">
+                <button onClick={handleJoin} className="w-full py-4 bg-accent text-white font-bold rounded-xl text-lg shadow-lg shadow-accent/30 hover:bg-accentHover transition mt-4">
                   Comenzar Viaje
                 </button>
               </div>
