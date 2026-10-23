@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db, googleProvider } from '../firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { collection, onSnapshot, addDoc, updateDoc, doc, query, where, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, query, where, serverTimestamp } from 'firebase/firestore';
 
 const AppContext = createContext();
 
@@ -12,7 +12,6 @@ export const AppProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [habits, setHabits] = useState([]);
 
-  // Manejo de sesión
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -21,7 +20,6 @@ export const AppProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Cargar hábitos en tiempo real
   useEffect(() => {
     if (!user) {
       setHabits([]);
@@ -30,6 +28,7 @@ export const AppProvider = ({ children }) => {
     const q = query(collection(db, "habits"), where("userId", "==", user.uid));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const habitsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      habitsData.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
       setHabits(habitsData);
     });
     return () => unsubscribe();
@@ -47,25 +46,30 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const addHabit = async (title, description, iconName, color) => {
+  const addHabit = async (habitData) => {
     if (!user) return;
     try {
       await addDoc(collection(db, "habits"), {
         userId: user.uid,
-        title,
-        description,
-        iconName,
-        color,
         completed: false,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        ...habitData
       });
     } catch (error) {
       console.error("Error creando hábito:", error);
     }
   };
 
+  const deleteHabit = async (habitId) => {
+    try {
+      await deleteDoc(doc(db, "habits", habitId));
+    } catch (error) {
+      console.error("Error eliminando hábito:", error);
+    }
+  };
+
   return (
-    <AppContext.Provider value={{ user, loading, habits, loginWithGoogle, logout, toggleHabit, addHabit }}>
+    <AppContext.Provider value={{ user, loading, habits, loginWithGoogle, logout, toggleHabit, addHabit, deleteHabit }}>
       {!loading && children}
     </AppContext.Provider>
   );
