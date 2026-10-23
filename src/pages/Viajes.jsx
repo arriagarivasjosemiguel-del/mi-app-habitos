@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Play, X, Clock, Calendar } from 'lucide-react';
+import { Play, X, Clock, Calendar, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const JOURNEYS = [
@@ -27,20 +27,19 @@ const JOURNEYS = [
 ];
 
 export const Viajes = () => {
-  // Guardar en localStorage para que no se borren al recargar
-  const [myJourneys, setMyJourneys] = useState(() => {
-    const saved = localStorage.getItem('myJourneys');
-    return saved ? JSON.parse(saved) : [];
-  });
-  
+  const [myJourneys, setMyJourneys] = useState(() => JSON.parse(localStorage.getItem('myJourneys')) || []);
   const [selectedJourney, setSelectedJourney] = useState(null);
+  
   const [selectedLevel, setSelectedLevel] = useState('Principiante');
-  const [selectedFreq, setSelectedFreq] = useState('Lunes a Lunes (Todos los días)');
+  const [selectedFreq, setSelectedFreq] = useState('Lunes a Lunes');
+  const [customDays, setCustomDays] = useState([]);
 
-  // Efecto para guardar en localStorage cuando cambie
-  useEffect(() => {
-    localStorage.setItem('myJourneys', JSON.stringify(myJourneys));
-  }, [myJourneys]);
+  useEffect(() => { localStorage.setItem('myJourneys', JSON.stringify(myJourneys)); }, [myJourneys]);
+
+  const toggleCustomDay = (day) => {
+    if (customDays.includes(day)) setCustomDays(customDays.filter(d => d !== day));
+    else setCustomDays([...customDays, day]);
+  };
 
   const handleJoin = () => {
     setMyJourneys([...myJourneys, selectedJourney.id]);
@@ -61,13 +60,8 @@ export const Viajes = () => {
           <div className="space-y-4">
             {JOURNEYS.filter(j => myJourneys.includes(j.id)).map((c) => (
               <div key={c.id} className="bg-gradient-to-r from-accent/20 to-cardDark p-4 rounded-2xl border border-accent/30 flex items-center gap-4">
-                <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center">
-                  <Play size={20} className="text-white" fill="white" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-white">{c.title}</h4>
-                  <p className="text-xs text-accent font-semibold">En progreso...</p>
-                </div>
+                <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center"><Play size={20} className="text-white" fill="white" /></div>
+                <div className="flex-1"><h4 className="font-bold text-white">{c.title}</h4><p className="text-xs text-accent font-semibold">En progreso...</p></div>
               </div>
             ))}
           </div>
@@ -94,61 +88,55 @@ export const Viajes = () => {
       <AnimatePresence>
         {selectedJourney && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            {/* MODAL CENTRADO Y COMPACTO */}
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-cardDark w-full max-w-sm rounded-3xl p-6 border border-gray-700 max-h-[85vh] overflow-y-auto shadow-2xl">
-              <div className="flex justify-between items-center mb-5">
-                <h2 className="text-xl font-bold text-white">Configurar Viaje</h2>
-                <button onClick={() => setSelectedJourney(null)} className="p-1.5 bg-gray-800 rounded-full text-gray-400 hover:text-white">
-                  <X size={18} />
-                </button>
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-cardDark w-full max-w-sm rounded-3xl p-5 border border-gray-700 max-h-[90vh] overflow-y-auto shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-white">Configurar</h2>
+                <button onClick={() => setSelectedJourney(null)} className="p-1.5 bg-gray-800 rounded-full text-gray-400"><X size={18} /></button>
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-textMuted mb-2 block uppercase tracking-wider">Nivel de dificultad</label>
+                  <label className="text-[10px] font-bold text-textMuted mb-2 block uppercase">Dificultad</label>
                   <div className="flex gap-2">
                     {['Principiante', 'Intermedio', 'Maestro'].map(lvl => (
-                      <button key={lvl} onClick={() => setSelectedLevel(lvl)} className={`flex-1 py-2 border rounded-lg text-[11px] transition ${selectedLevel === lvl ? 'bg-accent/20 border-accent text-accent font-bold' : 'bg-bgDark border-gray-800 text-white hover:border-gray-600'}`}>
-                        {lvl}
-                      </button>
+                      <button key={lvl} onClick={() => setSelectedLevel(lvl)} className={`flex-1 py-1.5 border rounded-lg text-[10px] transition ${selectedLevel === lvl ? 'bg-accent/20 border-accent text-accent font-bold' : 'bg-bgDark border-gray-800 text-white'}`}>{lvl}</button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-textMuted mb-2 block uppercase tracking-wider">Frecuencia</label>
+                  <label className="text-[10px] font-bold text-textMuted mb-2 block uppercase">Frecuencia</label>
                   <div className="flex flex-col gap-2">
-                    {['Lunes a Lunes (Todos los días)', 'Lunes a Viernes (Días laborales)', 'Personalizado'].map(freq => (
-                      <button key={freq} onClick={() => setSelectedFreq(freq)} className={`w-full py-2.5 border rounded-lg text-xs text-left px-3 transition ${selectedFreq === freq ? 'bg-accent/10 border-accent text-accent font-semibold' : 'bg-bgDark border-gray-800 text-white hover:border-gray-600'}`}>
-                        {freq}
-                      </button>
+                    {['Lunes a Lunes', 'Lunes a Viernes', 'Personalizado'].map(freq => (
+                      <button key={freq} onClick={() => setSelectedFreq(freq)} className={`w-full py-2 border rounded-lg text-xs text-left px-3 transition ${selectedFreq === freq ? 'bg-accent/10 border-accent text-accent font-semibold' : 'bg-bgDark border-gray-800 text-white'}`}>{freq}</button>
                     ))}
-                    <p className="text-[10px] text-yellow-500 mt-1">💡 Recomendado: al menos 5 días a la semana.</p>
                   </div>
                 </div>
+
+                {selectedFreq === 'Personalizado' && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="bg-bgDark p-3 rounded-xl border border-gray-800">
+                    <p className="text-[10px] text-textMuted mb-2 text-center">Selecciona los días</p>
+                    <div className="flex justify-between">
+                      {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
+                        <button key={i} onClick={() => toggleCustomDay(i)} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${customDays.includes(i) ? 'bg-accent text-white' : 'bg-gray-800 text-gray-400'}`}>{d}</button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
 
                 <div>
-                  <label className="text-xs font-semibold text-textMuted mb-2 block uppercase tracking-wider">Hora y duración</label>
+                  <label className="text-[10px] font-bold text-textMuted mb-2 block uppercase">Hora y duración</label>
                   <div className="flex gap-2">
-                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
-                      <Clock size={14} className="text-accent" />
-                      <input type="time" className="bg-transparent text-white outline-none w-full text-xs" defaultValue="08:00" />
+                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-lg p-2 flex items-center gap-2">
+                      <Clock size={14} className="text-accent" /><input type="time" className="bg-transparent text-white outline-none w-full text-xs" defaultValue="08:00" />
                     </div>
-                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
-                      <Calendar size={14} className="text-accent" />
-                      <select className="bg-transparent text-white outline-none w-full text-xs appearance-none">
-                        <option>10 min</option>
-                        <option>15 min</option>
-                        <option>20 min</option>
-                        <option>30 min</option>
-                      </select>
+                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-lg p-2 flex items-center gap-2">
+                      <Calendar size={14} className="text-accent" /><select className="bg-transparent text-white outline-none w-full text-xs appearance-none"><option>10 min</option><option>15 min</option><option>30 min</option></select>
                     </div>
                   </div>
                 </div>
 
-                <button onClick={handleJoin} className="w-full py-3.5 bg-accent text-white font-bold rounded-xl text-sm shadow-lg shadow-accent/30 hover:bg-accentHover transition mt-2">
-                  Comenzar Viaje
-                </button>
+                <button onClick={handleJoin} className="w-full py-3 bg-accent text-white font-bold rounded-xl text-sm shadow-lg shadow-accent/30 mt-2">Comenzar</button>
               </div>
             </motion.div>
           </motion.div>

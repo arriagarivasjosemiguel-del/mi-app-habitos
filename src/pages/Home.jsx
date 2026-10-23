@@ -1,33 +1,37 @@
 import { useState } from 'react';
-import { Bell, CheckCircle2, Circle, MoreVertical, Trash2, LogIn } from 'lucide-react';
+import { Bell, CheckCircle2, Circle, MoreVertical, Trash2, LogIn, CheckSquare } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HabitForm } from '../components/HabitForm';
-import { useNavigate } from 'react-router-dom'; // IMPORTANTE para la navegación
+import { TaskForm } from '../components/TaskForm';
+import { useNavigate } from 'react-router-dom';
 
 export const Home = () => {
-  const { user, habits, toggleHabit, deleteHabit, loginWithGoogle } = useApp();
-  const [showForm, setShowForm] = useState(false);
+  const { user, habits, tasks, toggleHabit, deleteHabit, loginWithGoogle } = useApp();
+  const [showHabitForm, setShowHabitForm] = useState(false);
+  const [showTaskForm, setShowTaskForm] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const navigate = useNavigate(); // Hook para navegar
+  const navigate = useNavigate();
 
   const sortedHabits = [...habits].sort((a, b) => Number(a.completed) - Number(b.completed));
   const completedCount = habits.filter(h => h.completed).length;
   const progress = habits.length === 0 ? 0 : (completedCount / habits.length) * 100;
 
+  // Tareas de hoy (comparando fecha actual con la fecha límite de la tarea)
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayTasks = tasks.filter(t => t.date === todayStr || !t.date);
+
   return (
-    <div className="relative min-h-full animate-slide-up pb-24">
+    <div className="relative min-h-full animate-slide-up pb-32">
       <header className="sticky top-0 z-40 bg-bgDark/90 backdrop-blur-md px-6 py-4 border-b border-gray-800 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Hoy</h1>
           <p className="text-textMuted text-xs mt-0.5">Pequeños hábitos, grandes resultados.</p>
         </div>
-        <button onClick={() => setShowNotifications(true)} className="relative p-2 bg-cardDark rounded-full border border-gray-700 hover:bg-gray-800 transition-colors">
+        <button onClick={() => setShowNotifications(true)} className="relative p-2 bg-cardDark rounded-full border border-gray-700">
           <Bell size={20} className="text-white" />
-          {habits.some(h => !h.completed) && (
-            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-bgDark animate-pulse"></span>
-          )}
+          {habits.some(h => !h.completed) && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>}
         </button>
       </header>
 
@@ -38,20 +42,17 @@ export const Home = () => {
               <p className="text-white font-semibold text-sm">Inicia sesión con Google</p>
               <p className="text-textMuted text-xs">Para guardar tu progreso.</p>
             </div>
-            <button onClick={loginWithGoogle} className="bg-accent p-2 rounded-xl text-white">
-              <LogIn size={18} />
-            </button>
+            <button onClick={loginWithGoogle} className="bg-accent p-2 rounded-xl text-white"><LogIn size={18} /></button>
           </div>
         )}
 
-        <div className="relative rounded-2xl overflow-hidden mb-6 h-40 flex flex-col justify-end p-5 border border-gray-800 shadow-lg">
+        <div onClick={() => navigate('/viajes')} className="relative rounded-2xl overflow-hidden mb-6 h-40 flex flex-col justify-end p-5 border border-gray-800 shadow-lg cursor-pointer transform transition hover:scale-[1.02]">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&q=80&w=600')] bg-cover bg-center"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
           <div className="relative z-10">
             <span className="bg-accent text-white text-[10px] font-bold px-2 py-1 rounded-md mb-2 inline-block uppercase tracking-wider">Recomendado</span>
             <h2 className="text-xl font-bold leading-tight mb-2 text-white">Construye la mejor<br/>versión de ti</h2>
-            {/* BOTÓN CORREGIDO PARA NAVEGAR A VIAJES */}
-            <button onClick={() => navigate('/viajes')} className="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-white/30 transition">Ver viajes →</button>
+            <button className="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-4 py-1.5 rounded-full">Ver viajes →</button>
           </div>
         </div>
 
@@ -65,84 +66,67 @@ export const Home = () => {
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mb-8">
           <AnimatePresence>
             {sortedHabits.map((habit) => (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, y: 10 }} 
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                key={habit.id} 
-                className="bg-cardDark p-4 rounded-2xl flex items-center justify-between border border-gray-800 relative z-10 shadow-sm"
-              >
+              <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} key={habit.id} className="bg-cardDark p-4 rounded-2xl flex items-center justify-between border border-gray-800 relative z-10 shadow-sm">
                 <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 ${habit.color || 'bg-accent'} rounded-xl flex items-center justify-center shadow-inner`}>
-                    <CheckCircle2 size={20} className="text-white" />
-                  </div>
+                  <div className={`w-10 h-10 ${habit.color || 'bg-accent'} rounded-xl flex items-center justify-center`}><CheckCircle2 size={20} className="text-white" /></div>
                   <div>
                     <h4 className={`font-semibold text-white ${habit.completed ? 'line-through text-textMuted' : ''}`}>{habit.title}</h4>
-                    <p className="text-xs text-textMuted">{habit.description}</p>
+                    <p className="text-xs text-textMuted">{habit.description} • {habit.time}</p>
                   </div>
                 </div>
-                
                 <div className="flex items-center gap-2">
-                  <button onClick={() => toggleHabit(habit.id, habit.completed)} className="p-1">
-                    {habit.completed ? 
-                      <CheckCircle2 size={24} className="text-accent" /> : 
-                      <Circle size={24} className="text-gray-600" />
-                    }
+                  <button onClick={() => toggleHabit(habit.id, habit.completed)}>
+                    {habit.completed ? <CheckCircle2 size={24} className="text-accent" /> : <Circle size={24} className="text-gray-600" />}
                   </button>
-                  <button onClick={() => setMenuOpen(menuOpen === habit.id ? null : habit.id)} className="p-1 text-gray-500 hover:text-white">
-                    <MoreVertical size={20} />
-                  </button>
+                  <button onClick={() => setMenuOpen(menuOpen === habit.id ? null : habit.id)}><MoreVertical size={20} className="text-gray-500" /></button>
                 </div>
-
                 {menuOpen === habit.id && (
                   <div className="absolute right-4 top-14 bg-gray-800 rounded-lg shadow-xl z-20 border border-gray-700">
-                    <button onClick={() => { deleteHabit(habit.id); setMenuOpen(null); }} className="flex items-center gap-2 px-4 py-2 text-red-400 text-sm w-full text-left hover:bg-gray-700 rounded-lg">
-                      <Trash2 size={14} /> Eliminar
-                    </button>
+                    <button onClick={() => { deleteHabit(habit.id); setMenuOpen(null); }} className="flex items-center gap-2 px-4 py-2 text-red-400 text-sm hover:bg-gray-700 rounded-lg"><Trash2 size={14} /> Eliminar</button>
                   </div>
                 )}
               </motion.div>
             ))}
           </AnimatePresence>
         </div>
+
+        {/* Separador de Tareas */}
+        {todayTasks.length > 0 && (
+          <>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px bg-gray-700 flex-1"></div>
+              <span className="text-xs text-textMuted font-bold uppercase tracking-widest">Tareas de Hoy</span>
+              <div className="h-px bg-gray-700 flex-1"></div>
+            </div>
+            <div className="space-y-3">
+              {todayTasks.map(task => (
+                <div key={task.id} className="bg-cardDark p-4 rounded-2xl flex items-center gap-4 border border-gray-800">
+                  <CheckSquare size={20} className={task.completed ? "text-[#FF9800]" : "text-gray-500"} />
+                  <div>
+                    <h4 className={`font-semibold text-sm text-white ${task.completed ? 'line-through text-textMuted' : ''}`}>{task.title}</h4>
+                    <p className="text-[10px] text-[#FF9800]">{task.priority} • {task.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="fixed bottom-20 left-0 w-full flex justify-center z-40 pointer-events-none px-6">
-        <button onClick={() => setShowForm(true)} className="w-full max-w-sm py-3 bg-accent text-white rounded-xl font-bold shadow-lg shadow-accent/30 pointer-events-auto hover:bg-accentHover transition-colors">
+      <div className="fixed bottom-20 left-0 w-full flex flex-col items-center gap-2 z-40 pointer-events-none px-6">
+        <button onClick={() => setShowTaskForm(true)} className="w-full max-w-sm py-2.5 bg-[#FF9800] text-white rounded-xl font-bold shadow-lg shadow-[#FF9800]/30 pointer-events-auto hover:bg-[#F57C00] transition-colors flex justify-center items-center gap-2">
+          <CheckSquare size={18} /> Agregar Tarea
+        </button>
+        <button onClick={() => setShowHabitForm(true)} className="w-full max-w-sm py-3 bg-accent text-white rounded-xl font-bold shadow-lg shadow-accent/30 pointer-events-auto hover:bg-accentHover transition-colors">
           + Agregar Hábito
         </button>
       </div>
 
-      {showForm && <HabitForm onClose={() => setShowForm(false)} />}
-
-      <AnimatePresence>
-        {showNotifications && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center pt-20 px-4 backdrop-blur-sm">
-            <motion.div initial={{ y: -50 }} animate={{ y: 0 }} className="bg-cardDark w-full max-w-sm rounded-3xl p-6 border border-gray-700 shadow-2xl">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-white">Pendientes Hoy</h3>
-                <button onClick={() => setShowNotifications(false)} className="text-gray-400 hover:text-white">Cerrar</button>
-              </div>
-              <div className="space-y-3">
-                {habits.filter(h => !h.completed).length === 0 ? (
-                  <p className="text-textMuted text-sm text-center py-4">¡Todo al día! No tienes pendientes.</p>
-                ) : (
-                  habits.filter(h => !h.completed).map(h => (
-                    <div key={h.id} className="flex items-center gap-3 bg-bgDark p-3 rounded-xl border border-gray-800">
-                      <Circle size={18} className="text-gray-500" />
-                      <p className="text-white text-sm">{h.title}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showHabitForm && <HabitForm onClose={() => setShowHabitForm(false)} />}
+      {showTaskForm && <TaskForm onClose={() => setShowTaskForm(false)} />}
     </div>
   );
 };
