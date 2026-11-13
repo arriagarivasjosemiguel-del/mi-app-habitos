@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, CheckCircle2, Circle, MoreVertical, Trash2, LogIn, CheckSquare } from 'lucide-react';
+import { Bell, CheckCircle2, Circle, MoreVertical, Trash2, LogIn, CheckSquare, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HabitForm } from '../components/HabitForm';
@@ -18,9 +18,11 @@ export const Home = () => {
   const completedCount = habits.filter(h => h.completed).length;
   const progress = habits.length === 0 ? 0 : (completedCount / habits.length) * 100;
 
-  // Tareas de hoy (comparando fecha actual con la fecha límite de la tarea)
   const todayStr = new Date().toISOString().split('T')[0];
   const todayTasks = tasks.filter(t => t.date === todayStr || !t.date);
+
+  // Filtramos los hábitos pendientes para la campanita
+  const pendingHabits = habits.filter(h => !h.completed);
 
   return (
     <div className="relative min-h-full animate-slide-up pb-32">
@@ -29,9 +31,9 @@ export const Home = () => {
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Hoy</h1>
           <p className="text-textMuted text-xs mt-0.5">Pequeños hábitos, grandes resultados.</p>
         </div>
-        <button onClick={() => setShowNotifications(true)} className="relative p-2 bg-cardDark rounded-full border border-gray-700">
+        <button onClick={() => setShowNotifications(true)} className="relative p-2 bg-cardDark rounded-full border border-gray-700 hover:bg-gray-800 transition-colors">
           <Bell size={20} className="text-white" />
-          {habits.some(h => !h.completed) && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>}
+          {pendingHabits.length > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse border border-bgDark"></span>}
         </button>
       </header>
 
@@ -93,7 +95,6 @@ export const Home = () => {
           </AnimatePresence>
         </div>
 
-        {/* Separador de Tareas */}
         {todayTasks.length > 0 && (
           <>
             <div className="flex items-center gap-3 mb-4">
@@ -114,6 +115,17 @@ export const Home = () => {
             </div>
           </>
         )}
+
+        {/* DISEÑO BONITO AL FINAL */}
+        {habits.length > 0 && (
+          <div className="mt-10 text-center pb-6">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 mb-3">
+              <CheckCircle2 className="text-accent" size={24} />
+            </div>
+            <p className="text-sm font-semibold text-white">¡Vas por buen camino!</p>
+            <p className="text-xs text-textMuted">Sigue así, cada pequeño paso cuenta.</p>
+          </div>
+        )}
       </div>
 
       <div className="fixed bottom-20 left-0 w-full flex flex-col items-center gap-2 z-40 pointer-events-none px-6">
@@ -127,6 +139,40 @@ export const Home = () => {
 
       {showHabitForm && <HabitForm onClose={() => setShowHabitForm(false)} />}
       {showTaskForm && <TaskForm onClose={() => setShowTaskForm(false)} />}
+
+      {/* MODAL CAMPANITA */}
+      <AnimatePresence>
+        {showNotifications && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center pt-20 px-4 backdrop-blur-sm">
+            <motion.div initial={{ y: -50, scale: 0.9 }} animate={{ y: 0, scale: 1 }} className="bg-cardDark w-full max-w-sm rounded-3xl p-6 border border-gray-700 shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-white">Pendientes Hoy</h3>
+                <button onClick={() => setShowNotifications(false)} className="p-1.5 bg-gray-800 rounded-full text-gray-400 hover:text-white"><X size={16} /></button>
+              </div>
+              <div className="space-y-3 max-h-60 overflow-y-auto">
+                {pendingHabits.length === 0 && todayTasks.filter(t=>!t.completed).length === 0 ? (
+                  <p className="text-textMuted text-sm text-center py-4">¡Todo al día! No tienes pendientes.</p>
+                ) : (
+                  <>
+                    {pendingHabits.map(h => (
+                      <div key={h.id} className="flex items-center gap-3 bg-bgDark p-3 rounded-xl border border-gray-800">
+                        <Circle size={18} className="text-accent" />
+                        <p className="text-white text-sm">{h.title} <span className="text-textMuted text-xs">({h.time})</span></p>
+                      </div>
+                    ))}
+                    {todayTasks.filter(t=>!t.completed).map(t => (
+                      <div key={t.id} className="flex items-center gap-3 bg-bgDark p-3 rounded-xl border border-[#FF9800]/30">
+                        <CheckSquare size={18} className="text-[#FF9800]" />
+                        <p className="text-white text-sm">{t.title}</p>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

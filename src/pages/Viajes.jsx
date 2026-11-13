@@ -1,34 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Play, X, Clock, Calendar, Check } from 'lucide-react';
+import { Play, X, Clock, Calendar, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const JOURNEYS = [
-  { id: 'j1', title: 'Rutina de mañana', desc: 'Empieza el día con energía y enfoque.', days: '7 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j2', title: 'Meditación para tranquilidad', desc: 'Calma tu mente, mejora tu enfoque.', days: '7 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j3', title: 'Despídete del azúcar', desc: 'Más energía, mejor salud.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1622484212850-eb596d769edc?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j4', title: 'Lectura diaria', desc: 'Alimenta tu mente con buenos libros.', days: '21 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j5', title: 'Ejercicio en casa', desc: 'Mantente en forma sin ir al gimnasio.', days: '30 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j6', title: 'Hidratación extrema', desc: 'Toma más agua durante el día.', days: '7 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j7', title: 'Dormir mejor', desc: 'Mejora la calidad de tu sueño.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j8', title: 'Aprender un idioma', desc: 'Practica un nuevo idioma cada día.', days: '30 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j9', title: 'Productividad', desc: 'Optimiza tu tiempo y enfócate.', days: '14 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j10', title: 'Alimentación sana', desc: 'Come mejor para sentirte mejor.', days: '21 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j11', title: 'Yoga para principiantes', desc: 'Flexibilidad y relajación.', days: '7 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j12', title: 'Caminar diario', desc: 'Da 10,000 pasos al día.', days: '30 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j13', title: 'Diario de gratitud', desc: 'Escribe 3 cosas buenas al día.', days: '21 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j14', title: 'Cuidado de la piel', desc: 'Rutina básica de skincare.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j15', title: 'Sin redes sociales', desc: 'Desconéctate del mundo digital.', days: '7 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j16', title: 'Orden en casa', desc: 'Mantén tu espacio limpio.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j17', title: 'Finanzas personales', desc: 'Ahorra y controla tus gastos.', days: '30 días', level: 'Intermedio', img: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j18', title: 'Creatividad', desc: 'Dibuja o escribe algo nuevo.', days: '21 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j19', title: 'Cocina saludable', desc: 'Prepara tus propias comidas.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j20', title: 'Conexión social', desc: 'Habla con alguien que quieras.', days: '7 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=600' },
-  { id: 'j21', title: 'Respiración consciente', desc: 'Reduce el estrés con respiración.', days: '7 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&q=80&w=600' },
+  { id: 'j1', title: 'Rutina de mañana', desc: 'Empieza el día con energía y enfoque.', days: '7 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&q=80&w=600', routine: ['Beber 1 vaso de agua al despertar', 'Estiramiento de 5 minutos', 'Meditar 5 minutos', 'Escribir 3 gratitudes', 'Desayuno saludable', 'Leer 10 páginas', 'Caminar 10 minutos'] },
+  { id: 'j2', title: 'Meditación para tranquilidad', desc: 'Calma tu mente, mejora tu enfoque.', days: '7 días', level: 'Todos los niveles', img: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600', routine: ['Respiración profunda 5 min', 'Meditación guiada 10 min', 'Caminar consciente', 'Diario de emociones', 'Yoga suave', 'Escuchar música relajante', 'Dormir 8 horas'] },
+  { id: 'j3', title: 'Despídete del azúcar', desc: 'Más energía, mejor salud.', days: '14 días', level: 'Principiante', img: 'https://images.unsplash.com/photo-1622484212850-eb596d769edc?auto=format&fit=crop&q=80&w=600', routine: ['Beber 2L de agua', 'Comer 1 fruta', 'No refrescos', 'Caminar 20 min', 'Leer etiquetas', 'Comer vegetales', 'Dormir bien'] },
 ];
 
 export const Viajes = () => {
   const [myJourneys, setMyJourneys] = useState(() => JSON.parse(localStorage.getItem('myJourneys')) || []);
   const [selectedJourney, setSelectedJourney] = useState(null);
+  const [activeJourney, setActiveJourney] = useState(null); // Para ver el detalle
   
   const [selectedLevel, setSelectedLevel] = useState('Principiante');
   const [selectedFreq, setSelectedFreq] = useState('Lunes a Lunes');
@@ -36,16 +19,41 @@ export const Viajes = () => {
 
   useEffect(() => { localStorage.setItem('myJourneys', JSON.stringify(myJourneys)); }, [myJourneys]);
 
-  const toggleCustomDay = (day) => {
-    if (customDays.includes(day)) setCustomDays(customDays.filter(d => d !== day));
-    else setCustomDays([...customDays, day]);
-  };
-
   const handleJoin = () => {
     setMyJourneys([...myJourneys, selectedJourney.id]);
     setSelectedJourney(null);
     alert(`¡Te has unido a "${selectedJourney.title}"!`);
   };
+
+  // Vista de detalle del viaje activo
+  if (activeJourney) {
+    return (
+      <div className="min-h-full animate-slide-up pb-24">
+        <div className="relative h-64 w-full">
+          <img src={activeJourney.img} alt={activeJourney.title} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-bgDark via-bgDark/50 to-transparent"></div>
+          <button onClick={() => setActiveJourney(null)} className="absolute top-6 left-6 p-2 bg-black/50 backdrop-blur-md rounded-full text-white"><ArrowLeft size={20} /></button>
+          <div className="absolute bottom-6 left-6">
+            <span className="bg-accent text-white text-[10px] font-bold px-2 py-1 rounded-md mb-2 inline-block uppercase">En Progreso</span>
+            <h1 className="text-3xl font-extrabold text-white">{activeJourney.title}</h1>
+            <p className="text-textMuted text-sm">{activeJourney.desc}</p>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <h2 className="text-xl font-bold text-white mb-4">Tu rutina diaria</h2>
+          <div className="space-y-3">
+            {activeJourney.routine.map((task, i) => (
+              <div key={i} className="bg-cardDark p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+                <div className="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold text-sm">{i + 1}</div>
+                <p className="text-white text-sm font-medium">{task}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 pb-24 animate-slide-up min-h-full">
@@ -59,9 +67,9 @@ export const Viajes = () => {
           <h2 className="font-bold text-xl text-white mb-4">Mis Viajes Activos</h2>
           <div className="space-y-4">
             {JOURNEYS.filter(j => myJourneys.includes(j.id)).map((c) => (
-              <div key={c.id} className="bg-gradient-to-r from-accent/20 to-cardDark p-4 rounded-2xl border border-accent/30 flex items-center gap-4">
+              <div key={c.id} onClick={() => setActiveJourney(c)} className="bg-gradient-to-r from-accent/20 to-cardDark p-4 rounded-2xl border border-accent/30 flex items-center gap-4 cursor-pointer hover:scale-[1.02] transition-transform">
                 <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center"><Play size={20} className="text-white" fill="white" /></div>
-                <div className="flex-1"><h4 className="font-bold text-white">{c.title}</h4><p className="text-xs text-accent font-semibold">En progreso...</p></div>
+                <div className="flex-1"><h4 className="font-bold text-white">{c.title}</h4><p className="text-xs text-accent font-semibold">Ver rutina →</p></div>
               </div>
             ))}
           </div>
@@ -103,7 +111,6 @@ export const Viajes = () => {
                     ))}
                   </div>
                 </div>
-
                 <div>
                   <label className="text-[10px] font-bold text-textMuted mb-2 block uppercase">Frecuencia</label>
                   <div className="flex flex-col gap-2">
@@ -112,30 +119,6 @@ export const Viajes = () => {
                     ))}
                   </div>
                 </div>
-
-                {selectedFreq === 'Personalizado' && (
-                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="bg-bgDark p-3 rounded-xl border border-gray-800">
-                    <p className="text-[10px] text-textMuted mb-2 text-center">Selecciona los días</p>
-                    <div className="flex justify-between">
-                      {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
-                        <button key={i} onClick={() => toggleCustomDay(i)} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${customDays.includes(i) ? 'bg-accent text-white' : 'bg-gray-800 text-gray-400'}`}>{d}</button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-
-                <div>
-                  <label className="text-[10px] font-bold text-textMuted mb-2 block uppercase">Hora y duración</label>
-                  <div className="flex gap-2">
-                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-lg p-2 flex items-center gap-2">
-                      <Clock size={14} className="text-accent" /><input type="time" className="bg-transparent text-white outline-none w-full text-xs" defaultValue="08:00" />
-                    </div>
-                    <div className="flex-1 bg-bgDark border border-gray-800 rounded-lg p-2 flex items-center gap-2">
-                      <Calendar size={14} className="text-accent" /><select className="bg-transparent text-white outline-none w-full text-xs appearance-none"><option>10 min</option><option>15 min</option><option>30 min</option></select>
-                    </div>
-                  </div>
-                </div>
-
                 <button onClick={handleJoin} className="w-full py-3 bg-accent text-white font-bold rounded-xl text-sm shadow-lg shadow-accent/30 mt-2">Comenzar</button>
               </div>
             </motion.div>
